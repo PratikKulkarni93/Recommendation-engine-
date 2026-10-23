@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+{% from "_macros.html" import movie_card, stars %}
+{% block title %}{{ m.title }}{% endblock %}
+{% block content %}
+<section class="detail">
+  <div class="poster big" style="--h1:{{ m.hue1 }};--h2:{{ m.hue2 }}">
+    <span class="poster-title">{{ m.title }}</span><span class="poster-year">{{ m.year }}</span>
+  </div>
+  <div class="detail-info">
+    <h1>{{ m.title }} <small>({{ m.year }})</small></h1>
+    <div class="chips">{% for g in m.genres %}<a class="chip link" href="{{ url_for('browse', genre=g) }}">{{ g }}</a>{% endfor %}</div>
+    <p class="lead">{{ m.description }}</p>
+    <dl class="meta">
+      <dt>Director</dt><dd>{{ m.director }}</dd>
+      <dt>Cast</dt><dd>{{ m.actors }}</dd>
+      <dt>Community</dt><dd><b id="avgText">{{ '%.2f'|format(m.avg) if m.votes else 'No ratings yet' }}</b> / 5 &middot; <span id="votesText">{{ m.votes }}</span> rating{{ '' if m.votes == 1 else 's' }}</dd>
+    </dl>
+    <div class="rate-box">
+      <h3>Your rating</h3>
+      {{ stars(m.id, m.user_rating, current_user is not none) }}
+      {% if current_user %}
+        <button class="btn btn-ghost btn-sm clear-rating" data-movie="{{ m.id }}" {{ 'hidden' if not m.user_rating }}>Remove rating</button>
+        {% if predicted %}<p class="muted">&#128161; Based on your taste we predict you'd rate this <b>{{ predicted }}</b> / 5.</p>{% endif %}
+      {% else %}
+        <p class="muted"><a href="{{ url_for('login', next=request.path) }}">Sign in</a> to rate and get predictions.</p>
+      {% endif %}
+    </div>
+    <div class="hist">
+      <h3>Rating distribution</h3>
+      {% for n in [5, 4, 3, 2, 1] %}
+      <div class="hist-row"><span>{{ n }}&#9733;</span><div class="bar"><i style="width:{{ (hist[n-1] / hist_max * 100)|round|int }}%"></i></div><span>{{ hist[n-1] }}</span></div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+<section>
+  <div class="section-head"><h2>Because you're viewing {{ m.title }}</h2><span class="muted">Similar movies (content + collaborative)</span></div>
+  <div class="grid">{% for s in similar %}{{ movie_card(s) }}{% endfor %}</div>
+</section>
+{% endblock %}

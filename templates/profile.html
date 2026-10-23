@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_macros.html" import movie_card %}
+{% block title %}My Profile{% endblock %}
+{% block content %}
+<div class="section-head"><h1>{{ current_user['username'] }}'s profile</h1></div>
+<section class="two-col">
+  <div class="panel">
+    <h3>Your taste at a glance</h3>
+    <p class="muted">{{ items|length }} movie{{ '' if items|length == 1 else 's' }} rated{% if items %} &middot; average {{ '%.2f'|format(avg) }}{% endif %}</p>
+    {% for name, count, a in breakdown %}
+    <div class="hist-row wide"><span>{{ name }}</span><div class="bar"><i style="width:{{ (a / 5 * 100)|round|int }}%"></i></div><span>{{ '%.1f'|format(a) }} ({{ count }})</span></div>
+    {% else %}<p class="muted">Rate some movies to see your genre breakdown.</p>{% endfor %}
+  </div>
+  <div class="panel">
+    <h3>Favourite genres</h3>
+    <p class="muted">Used to personalise results while the engine is still learning (cold start).</p>
+    <form method="post" action="{{ url_for('update_genres') }}">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+      <div class="chips big">{% for g in genres %}
+        <label class="chip pick"><input type="checkbox" name="genres" value="{{ g }}" {{ 'checked' if g in favs }}><span>{{ g }}</span></label>{% endfor %}
+      </div>
+      <button class="btn btn-primary btn-sm" type="submit">Save genres</button>
+    </form>
+  </div>
+</section>
+<section>
+  <div class="section-head"><h2>My ratings</h2></div>
+  {% if items %}<div class="grid">{% for m in items %}{{ movie_card(m) }}{% endfor %}</div>
+  {% else %}<div class="empty"><h3>No ratings yet</h3><p><a href="{{ url_for('browse') }}">Browse movies</a> and click the stars to rate.</p></div>{% endif %}
+</section>
+{% endblock %}

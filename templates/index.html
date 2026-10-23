@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% from "_macros.html" import movie_card %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<section class="hero">
+  <div>
+    <h1>Find your next favourite movie.</h1>
+    <p>CineMatch blends <b>collaborative filtering</b> and <b>content-based analysis</b> into a hybrid engine that learns your taste from every rating you give.</p>
+    <div class="hero-actions">
+      {% if current_user %}
+        <a class="btn btn-primary" href="{{ url_for('recommendations') }}">See my recommendations</a>
+        <a class="btn btn-ghost" href="{{ url_for('browse') }}">Rate more movies</a>
+      {% else %}
+        <a class="btn btn-primary" href="{{ url_for('register') }}">Get started free</a>
+        <a class="btn btn-ghost" href="{{ url_for('login') }}">Try the demo (demo / demo123)</a>
+      {% endif %}
+    </div>
+  </div>
+  <div class="stats">
+    <div><b>{{ stats.movies }}</b><span>Movies</span></div>
+    <div><b>{{ stats.users }}</b><span>Users</span></div>
+    <div><b>{{ stats.ratings }}</b><span>Ratings</span></div>
+  </div>
+</section>
+
+{% if current_user %}
+<section>
+  <div class="section-head"><h2>Recommended for you</h2><a href="{{ url_for('recommendations') }}">View all &rarr;</a></div>
+  <div class="grid">{% for r in recs %}{{ movie_card(r.movie, r) }}{% endfor %}</div>
+</section>
+{% endif %}
+
+<section>
+  <div class="section-head"><h2>Top rated by the community</h2><a href="{{ url_for('browse') }}">Browse all &rarr;</a></div>
+  <div class="grid">{% for m in top %}{{ movie_card(m) }}{% endfor %}</div>
+</section>
+
+<section>
+  <div class="section-head"><h2>Explore by genre</h2></div>
+  <div class="chips big">{% for g in genres %}<a class="chip link" href="{{ url_for('browse', genre=g) }}">{{ g }}</a>{% endfor %}</div>
+</section>
+{% endblock %}

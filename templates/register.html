@@ -1,0 +1,21 @@
+{% extends "base.html" %}
+{% block title %}Sign up{% endblock %}
+{% block content %}
+<div class="auth-card wide">
+  <h1>Create your account</h1>
+  <form method="post" action="{{ url_for('register') }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <label>Username<input name="username" value="{{ username }}" required minlength="3" maxlength="20" pattern="[A-Za-z0-9_]+" autocomplete="username"></label>
+    <div class="two-inputs">
+      <label>Password<input type="password" name="password" required minlength="6" autocomplete="new-password"></label>
+      <label>Confirm password<input type="password" name="confirm" required minlength="6" autocomplete="new-password"></label>
+    </div>
+    <p class="label-text">Pick up to 6 favourite genres <span class="muted">(helps with recommendations before you rate anything)</span></p>
+    <div class="chips big">{% for g in genres %}
+      <label class="chip pick"><input type="checkbox" name="genres" value="{{ g }}" {{ 'checked' if g in chosen }}><span>{{ g }}</span></label>{% endfor %}
+    </div>
+    <button class="btn btn-primary block" type="submit">Create account</button>
+  </form>
+  <p class="muted center">Already registered? <a href="{{ url_for('login') }}">Sign in</a></p>
+</div>
+{% endblock %}

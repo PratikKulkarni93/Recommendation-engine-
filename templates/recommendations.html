@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+{% from "_macros.html" import movie_card %}
+{% block title %}Recommendations{% endblock %}
+{% block content %}
+<div class="section-head"><h1>Recommended for you</h1><span class="muted">You have rated {{ n_rated }} movie{{ '' if n_rated == 1 else 's' }}</span></div>
+
+{% if n_rated == 0 %}
+<div class="flash flash-info">You have not rated anything yet, so we are showing popular movies matching your favourite genres. <a href="{{ url_for('browse') }}">Rate a few movies</a> to unlock personalised results.</div>
+{% elif n_rated < 5 %}
+<div class="flash flash-info">Rate at least 5 movies for sharper recommendations. The engine is still learning your taste.</div>
+{% endif %}
+
+<div class="tabs">
+  {% for key, label, tip in [('hybrid', 'Hybrid', 'CF + content (best)'), ('cf', 'Collaborative', 'People like you'), ('content', 'Content-based', 'Similar attributes'), ('popular', 'Popular', 'Community favourites')] %}
+  <a class="tab {{ 'active' if method == key }}" href="{{ url_for('recommendations', method=key, genre=genre) }}"><b>{{ label }}</b><small>{{ tip }}</small></a>
+  {% endfor %}
+</div>
+<form class="filters" method="get">
+  <input type="hidden" name="method" value="{{ method }}">
+  <select name="genre" onchange="this.form.submit()">
+    <option value="">All genres</option>
+    {% for g in genres %}<option value="{{ g }}" {{ 'selected' if g == genre }}>{{ g }}</option>{% endfor %}
+  </select>
+</form>
+
+{% if recs %}
+<div class="grid">{% for r in recs %}{{ movie_card(r.movie, r) }}{% endfor %}</div>
+{% else %}
+<div class="empty"><h3>Nothing to recommend here</h3><p>You have already rated every movie in this selection. Try another genre.</p></div>
+{% endif %}
+{% endblock %}

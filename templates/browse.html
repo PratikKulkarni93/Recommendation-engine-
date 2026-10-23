@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% from "_macros.html" import movie_card %}
+{% block title %}Browse{% endblock %}
+{% block content %}
+<div class="section-head"><h1>Browse movies</h1><span class="muted">{{ total }} result{{ '' if total == 1 else 's' }}</span></div>
+<form class="filters" method="get" action="{{ url_for('browse') }}">
+  <input type="search" name="q" value="{{ q }}" placeholder="Search title, director or actor..." maxlength="60">
+  <select name="genre">
+    <option value="">All genres</option>
+    {% for g in genres %}<option value="{{ g }}" {{ 'selected' if g == genre }}>{{ g }}</option>{% endfor %}
+  </select>
+  <select name="sort">
+    {% for k, label in [('popular', 'Most popular'), ('rating', 'Highest rated'), ('year', 'Newest'), ('title', 'Title A-Z')] %}
+    <option value="{{ k }}" {{ 'selected' if k == sort }}>{{ label }}</option>{% endfor %}
+  </select>
+  <button class="btn btn-primary" type="submit">Apply</button>
+  {% if q or genre %}<a class="btn btn-ghost" href="{{ url_for('browse') }}">Reset</a>{% endif %}
+</form>
+
+{% if items %}
+<div class="grid">{% for m in items %}{{ movie_card(m) }}{% endfor %}</div>
+{% if pages > 1 %}
+<nav class="pager">
+  {% if page > 1 %}<a class="btn btn-ghost btn-sm" href="{{ url_for('browse', q=q, genre=genre, sort=sort, page=page-1) }}">&larr; Prev</a>{% endif %}
+  <span>Page {{ page }} of {{ pages }}</span>
+  {% if page < pages %}<a class="btn btn-ghost btn-sm" href="{{ url_for('browse', q=q, genre=genre, sort=sort, page=page+1) }}">Next &rarr;</a>{% endif %}
+</nav>
+{% endif %}
+{% else %}
+<div class="empty"><h3>No movies match your search</h3><p>Try a different keyword or clear the filters.</p></div>
+{% endif %}
+{% endblock %}

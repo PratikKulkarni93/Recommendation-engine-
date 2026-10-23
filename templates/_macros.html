@@ -1,0 +1,22 @@
+{% macro stars(movie_id, rating, logged_in) %}
+<div class="stars" data-movie="{{ movie_id }}" data-rating="{{ rating }}" data-auth="{{ 1 if logged_in else 0 }}">
+  {% for n in range(1, 6) %}<button type="button" class="star {{ 'on' if n <= rating }}" data-v="{{ n }}" aria-label="Rate {{ n }} stars">&#9733;</button>{% endfor %}
+</div>
+{% endmacro %}
+
+{% macro movie_card(m, rec=None) %}
+<article class="card">
+  <a class="poster" href="{{ url_for('movie_detail', movie_id=m.id) }}" style="--h1:{{ m.hue1 }};--h2:{{ m.hue2 }}">
+    <span class="badge">&#9733; {{ '%.1f'|format(m.avg) if m.votes else 'New' }}</span>
+    {% if rec %}<span class="badge match">{{ rec.match }}% match</span>{% endif %}
+    <span class="poster-title">{{ m.title }}</span>
+    <span class="poster-year">{{ m.year }}</span>
+  </a>
+  <div class="card-body">
+    <div class="chips">{% for g in m.genres[:3] %}<span class="chip">{{ g }}</span>{% endfor %}</div>
+    {% if rec %}<p class="reason">&#128161; {{ rec.reason }}</p>
+    <p class="muted small">Predicted rating: <b>{{ '%.1f'|format(rec.score) }}</b> / 5</p>{% endif %}
+    {{ stars(m.id, m.user_rating, current_user is not none) }}
+  </div>
+</article>
+{% endmacro %}

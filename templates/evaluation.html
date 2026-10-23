@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block title %}Evaluation{% endblock %}
+{% block content %}
+<div class="section-head"><h1>Model evaluation</h1>
+  <div class="tabs mini">{% for n in [5, 10, 15] %}<a class="tab {{ 'active' if n == k }}" href="{{ url_for('evaluation', k=n) }}">K = {{ n }}</a>{% endfor %}</div>
+</div>
+<p class="lead">Offline experiment: 20% of every user's ratings are hidden, the models are trained on the remaining <b>{{ ev.n_train }}</b> ratings and tested on <b>{{ ev.n_test }}</b> held-out ratings. Results are averaged over <b>{{ ev.repeats }}</b> random splits. A movie is <i>relevant</i> if the user rated it 4 or 5.</p>
+
+<section class="panel">
+  <h3>Rating prediction error <small class="muted">(lower is better)</small></h3>
+  <table class="table">
+    <thead><tr><th>Method</th><th>RMSE</th><th>MAE</th><th>Coverage</th><th></th></tr></thead>
+    <tbody>{% for r in ev.rating %}
+      <tr class="{{ 'best' if r.method == 'hybrid' }}"><td>{{ r.label }}</td><td>{{ '%.3f'|format(r.rmse) }}</td><td>{{ '%.3f'|format(r.mae) }}</td><td>{{ (r.coverage * 100)|round|int }}%</td>
+        <td class="barcell"><div class="bar"><i style="width:{{ (r.rmse / 1.8 * 100)|round|int }}%"></i></div></td></tr>
+    {% endfor %}</tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h3>Top-{{ k }} ranking quality <small class="muted">(higher is better)</small></h3>
+  <table class="table">
+    <thead><tr><th>Method</th><th>Precision@{{ k }}</th><th>Recall@{{ k }}</th><th>NDCG@{{ k }}</th><th>Catalogue coverage</th><th></th></tr></thead>
+    <tbody>{% for r in ev.ranking %}
+      <tr class="{{ 'best' if r.method == 'hybrid' }}"><td>{{ r.label }}</td><td>{{ '%.3f'|format(r.precision) }}</td><td>{{ '%.3f'|format(r.recall) }}</td><td>{{ '%.3f'|format(r.ndcg) }}</td><td>{{ (r.coverage * 100)|round|int }}%</td>
+        <td class="barcell"><div class="bar good"><i style="width:{{ (r.ndcg * 100)|round|int }}%"></i></div></td></tr>
+    {% endfor %}</tbody>
+  </table>
+</section>
+
+<section class="panel">
+  <h3>Metric definitions</h3>
+  <ul class="plain">
+    <li><b>RMSE / MAE</b> - average gap between predicted and actual star rating.</li>
+    <li><b>Precision@K</b> - share of the K recommended movies the user actually liked.</li>
+    <li><b>Recall@K</b> - share of all liked movies that appear in the top K.</li>
+    <li><b>NDCG@K</b> - ranking quality that rewards putting liked movies near the top.</li>
+    <li><b>Coverage</b> - share of predictions the algorithm could make itself (rating table) or share of the catalogue it ever recommends (ranking table).</li>
+  </ul>
+</section>
+{% endblock %}

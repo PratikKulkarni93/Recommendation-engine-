@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+{% block title %}About{% endblock %}
+{% block content %}
+<div class="section-head"><h1>About the project</h1></div>
+<section class="panel">
+  <h3>Abstract</h3>
+  <p>CineMatch is a web-based movie recommendation system that predicts how much a user will enjoy a movie they have not seen. It combines <b>item-based collaborative filtering</b> with a <b>TF-IDF content-based model</b> into a <b>hybrid recommender</b>, handles the <b>cold-start problem</b> with popularity and favourite genres, explains every suggestion, and is validated with an offline evaluation module.</p>
+</section>
+
+<section class="two-col">
+  <div class="panel"><h3>Algorithms</h3>
+    <ol class="plain">
+      <li><b>Popularity</b> - Bayesian weighted rating <code>WR = v/(v+m)&middot;R + m/(v+m)&middot;C</code> so a movie with two 5-star votes does not beat a proven classic.</li>
+      <li><b>Content-based</b> - each movie becomes a TF-IDF vector (genres, director, actors, plot words, decade). Similarity is the cosine of two vectors. A rating is predicted from the top 10 most similar movies the user has rated.</li>
+      <li><b>Collaborative filtering</b> - adjusted cosine similarity between movies after subtracting each user's mean rating, with significance shrinkage <code>n/(n+5)</code>. Prediction: <code>item mean + &Sigma;sim&middot;(r<sub>uj</sub> - mean<sub>j</sub>) / &Sigma;sim</code>.</li>
+      <li><b>Hybrid</b> - <code>&alpha;&middot;CF + (1-&alpha;)&middot;Content</code> with <code>&alpha; = n/(n+40)</code>, where n is the number of movies the user rated, blended with a user/item bias baseline for stability.</li>
+    </ol>
+  </div>
+  <div class="panel"><h3>Architecture</h3>
+    <pre class="arch">Browser (HTML/CSS/JS)
+   |  HTTP / JSON
+Flask routes (app.py)  -- auth, CSRF, validation
+   |                        |
+SQLite (database.py)   Recommender (recommender.py)
+ users, movies,          popularity, TF-IDF, item-CF,
+ ratings                 hybrid, evaluation
+   ^
+seed_data.py: 70 movies, 60 synthetic users</pre>
+    <p class="muted">The model retrains automatically whenever a rating is added, changed or removed.</p>
+  </div>
+</section>
+
+<section class="two-col">
+  <div class="panel"><h3>Key features</h3>
+    <ul class="plain">
+      <li>Registration, login, hashed passwords, CSRF protection</li>
+      <li>Search, genre filter, sorting and pagination</li>
+      <li>One-click 5-star rating with live community averages</li>
+      <li>Four recommendation modes with explanations ("Because you liked...")</li>
+      <li>Rating prediction on every movie page</li>
+      <li>Cold-start handling and graceful fallbacks</li>
+      <li>REST endpoints: <code>/api/recommendations</code>, <code>/api/movies/&lt;id&gt;/similar</code></li>
+      <li>Evaluation dashboard (RMSE, MAE, Precision, Recall, NDCG)</li>
+    </ul>
+  </div>
+  <div class="panel"><h3>Future scope</h3>
+    <ul class="plain">
+      <li>Matrix factorisation (SVD / ALS) for larger datasets</li>
+      <li>Import the MovieLens dataset and live posters via a free API</li>
+      <li>Implicit feedback (clicks, watch time) and session-based models</li>
+      <li>Diversity and novelty re-ranking</li>
+      <li>Deployment with Gunicorn and PostgreSQL</li>
+    </ul>
+  </div>
+</section>
+{% endblock %}
